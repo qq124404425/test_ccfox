@@ -1,14 +1,13 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-CoinParkÍ¨ÓÃĞ­Òé,Ê¹ÓÃPython2.7
-ÔËĞĞµØÖ·£ºhttp://127.0.0.1:6667£¬¶Ë¿Ú¿ÉÖ¸¶¨
-ÓÉÓÚÕË»§Ã»×Ê²ú£¬Î´×÷ÏêÏ¸²âÊÔ£¬»¶Ó­·´À¡Bug
+CoinParké€šç”¨åè®®,ä½¿ç”¨Python2.7
+è¿è¡Œåœ°å€ï¼šhttp://127.0.0.1:6667ï¼Œç«¯å£å¯æŒ‡å®š
+ç”±äºè´¦æˆ·æ²¡èµ„äº§ï¼Œæœªä½œè¯¦ç»†æµ‹è¯•ï¼Œæ¬¢è¿åé¦ˆBug
 QQ:1051804485
-·´À¡µØÖ·£ºhttps://www.botvs.com/bbs-topic/1963
-2018.6.26 15:57 ¸üĞÂ£¬ĞŞ¸ÄÁËBug
-¿ÉÒÔ°ÑÍ¨ÓÃĞ­Òéµ±³ÉÆÕÍ¨»úÆ÷ÈË£¬ÔËĞĞÔÚBotVsÄ£ÄâÅÌ¼´¿É£¬²»ÊÕÈ¡·ÑÓÃ
-ÎªÁËÊ¹ÓÃIOº¯Êı£¬ĞèÒªÖØÔØexchangeÀïµÄrpc·½·¨£¬jsµÄÀı×ÓÈçÏÂ£º
+åé¦ˆåœ°å€ï¼šhttps://www.botvs.com/bbs-topic/1963
+2018.6.26 15:57 æ›´æ–°ï¼Œä¿®æ”¹äº†Bug
+å¯ä»¥æŠŠé€šç”¨åè®®å½“æˆæ™®é€šæœºå™¨äººï¼Œè¿è¡Œåœ¨BotVsæ¨¡æ‹Ÿç›˜å³å¯ï¼Œä¸æ”¶å–è´¹ç”¨
+ä¸ºäº†ä½¿ç”¨IOå‡½æ•°ï¼Œéœ€è¦é‡è½½exchangeé‡Œçš„rpcæ–¹æ³•ï¼Œjsçš„ä¾‹å­å¦‚ä¸‹ï¼š
 exchange.rpc = function(path, obj) {
     return exchange.IO("api","POST", path, "obj="+escape(JSON.stringify(obj)));
 }
@@ -59,12 +58,12 @@ def httpPostWithSign(url, cmds, api_key, api_secret):
     response = urllib2.urlopen(req)
     return json.loads(response.read())
 
-# Ç©ÃûÊÇ HMAC_SHA256(secret, verb + path + expires + data)£¬Ê®Áù½øÖÆ±àÂë¡£
-# verb ±ØĞëÊÇ´óĞ´µÄ£¬url ÊÇÏà¶ÔµÄ£¬expires ±ØĞëÊÇ unix Ê±¼ä´Á£¨ÒÔÃëÎªµ¥Î»£©
-# ²¢ÇÒÊı¾İ£¨Èç¹û´æÔÚµÄ»°£©±ØĞëÊÇ JSON ¸ñÊ½£¬²¢ÇÒ¼üÖµÖ®¼äÃ»ÓĞ¿Õ¸ñ¡£
+# ç­¾åæ˜¯ HMAC_SHA256(secret, verb + path + expires + data)ï¼Œåå…­è¿›åˆ¶ç¼–ç ã€‚
+# verb å¿…é¡»æ˜¯å¤§å†™çš„ï¼Œurl æ˜¯ç›¸å¯¹çš„ï¼Œexpires å¿…é¡»æ˜¯ unix æ—¶é—´æˆ³ï¼ˆä»¥ç§’ä¸ºå•ä½ï¼‰
+# å¹¶ä¸”æ•°æ®ï¼ˆå¦‚æœå­˜åœ¨çš„è¯ï¼‰å¿…é¡»æ˜¯ JSON æ ¼å¼ï¼Œå¹¶ä¸”é”®å€¼ä¹‹é—´æ²¡æœ‰ç©ºæ ¼ã€‚
 def generate_signature(secret, verb, url, expires, data):
     """Generate a request signature compatible with cloud."""
-    # ½âÎö¸Ã url À´ÒÆ³ı»ù´¡µØÖ·¶øµÃµ½ path
+    # è§£æè¯¥ url æ¥ç§»é™¤åŸºç¡€åœ°å€è€Œå¾—åˆ° path
     parsedURL = urlparse(url)
     path = parsedURL.path
     if parsedURL.query:
@@ -269,9 +268,8 @@ class Server(BaseHTTPRequestHandler):
 
         self.data_string = self.rfile.read(int(self.headers['Content-Length']))
         data =json.loads(self.data_string.replace("'", '"'))
-		
-		ccfox = ccfoxClient(data["access_key"],data["access_key"])
-		
+        
+        ccfox = ccfoxClient(data["access_key"],data["access_key"])
 		
         sent_data = {}
         if data['method'] == "ticker":
@@ -287,12 +285,12 @@ class Server(BaseHTTPRequestHandler):
             sent_data = MyExchange.GetDepth(symbol, access_key, secret_key)
         elif data['method'] == "records":
             symbol = data['params']['symbol'].upper()
-			symbol.replace('_','/')
+            symbol.replace('_','/')
             period = data['params']['period']
             # access_key = data["access_key"]
             # secret_key = data["secret_key"]
             # sent_data = MyExchange.GetRecords(symbol, , access_key, secret_key)
-			sent_data = ccfox.get_queryCandlestick(symbol, int(period)*60*1000)
+            sent_data = ccfox.get_queryCandlestick(symbol, int(period)*60*1000)
         elif data['method'] == "trades":
             symbol = data['params']['symbol'].upper()
             access_key = data["access_key"]
