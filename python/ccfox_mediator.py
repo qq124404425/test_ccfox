@@ -312,7 +312,7 @@ class Server(BaseHTTPRequestHandler):
             sent_data = {"data":[]}
             ret_data = []
             if path == "/api/v1/future/queryContract":
-                ret_data = ccfox.ccfox.list_futureQueryContract()
+                ret_data = ccfox.list_futureQueryContract()
             
             sent_data['data'] = ret_data
 
