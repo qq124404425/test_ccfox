@@ -1,25 +1,9 @@
 # -*- coding: utf-8 -*-
-'''
-CoinPark通用协议,使用Python2.7
-运行地址：http://127.0.0.1:6667，端口可指定
-由于账户没资产，未作详细测试，欢迎反馈Bug
-QQ:1051804485
-反馈地址：https://www.botvs.com/bbs-topic/1963
-2018.6.26 15:57 更新，修改了Bug
-可以把通用协议当成普通机器人，运行在BotVs模拟盘即可，不收取费用
-为了使用IO函数，需要重载exchange里的rpc方法，js的例子如下：
-exchange.rpc = function(path, obj) {
-    return exchange.IO("api","POST", path, "obj="+escape(JSON.stringify(obj)));
-}
-function main() {
-	Log(exchange.rpc("/transfer", {cmd: "transfer/assets", body: {select:1}}));
-}
-'''
 
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import urllib
-import urllib2
+import urllib.request as urllib2
 import time
 import hmac
 import hashlib
@@ -58,12 +42,9 @@ def httpPostWithSign(url, cmds, api_key, api_secret):
     response = urllib2.urlopen(req)
     return json.loads(response.read())
 
-# 签名是 HMAC_SHA256(secret, verb + path + expires + data)，十六进制编码。
-# verb 必须是大写的，url 是相对的，expires 必须是 unix 时间戳（以秒为单位）
-# 并且数据（如果存在的话）必须是 JSON 格式，并且键值之间没有空格。
+
 def generate_signature(secret, verb, url, expires, data):
     """Generate a request signature compatible with cloud."""
-    # 解析该 url 来移除基础地址而得到 path
     parsedURL = urlparse(url)
     path = parsedURL.path
     if parsedURL.query:
@@ -266,7 +247,7 @@ class Server(BaseHTTPRequestHandler):
         
     def do_POST(self):
 
-        self.data_string = self.rfile.read(int(self.headers['Content-Length']))
+        self.data_string = self.rfile.read(int(self.headers['Content-Length'])).decode()
         data =json.loads(self.data_string.replace("'", '"'))
         
         ccfox = ccfoxClient(data["access_key"],data["access_key"])
@@ -287,10 +268,10 @@ class Server(BaseHTTPRequestHandler):
             symbol = data['params']['symbol'].upper()
             symbol.replace('_','/')
             period = data['params']['period']
-            # access_key = data["access_key"]
-            # secret_key = data["secret_key"]
-            # sent_data = MyExchange.GetRecords(symbol, , access_key, secret_key)
-            sent_data = ccfox.get_queryCandlestick(symbol, int(period)*60*1000)
+            ret_data = ccfox.get_queryCandlestick(symbol, int(period)*60*1000)
+            
+            sent_data = {"data":[]}
+            sent_data['data'] = ret_data
         elif data['method'] == "trades":
             symbol = data['params']['symbol'].upper()
             access_key = data["access_key"]
@@ -325,19 +306,23 @@ class Server(BaseHTTPRequestHandler):
             pair = data['params']['symbol'].upper()
             sent_data = MyExchange.GetOrders(access_key, secret_key, pair)
         elif data['method'][:2] == "__":
-            access_key = data["access_key"]
-            secret_key = data["secret_key"]
             path = data["method"].split('_')[-1]
             params = data["params"]
-            sent_data = MyExchange.IO(access_key, secret_key, path, params)
+            
+            sent_data = {"data":[]}
+            ret_data = []
+            if path == "/api/v1/future/queryContract":
+                ret_data = ccfox.ccfox.list_futureQueryContract()
+            
+            sent_data['data'] = ret_data
 
         self.do_HEAD()
-        self.wfile.write(json.dumps(sent_data))
+        self.wfile.write(json.dumps(sent_data).encode())
         
 def run(server_class=HTTPServer, handler_class=Server, port=6667):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print 'Starting http server...'
+    print('Starting http server...')
     httpd.serve_forever()
 
 if __name__ == "__main__":
