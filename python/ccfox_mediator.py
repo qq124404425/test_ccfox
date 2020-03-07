@@ -249,7 +249,7 @@ class Server(BaseHTTPRequestHandler):
 
         self.data_string = self.rfile.read(int(self.headers['Content-Length'])).decode()
         data =json.loads(self.data_string.replace("'", '"'))
-        
+        print(data)
         ccfox = ccfoxClient(data["access_key"],data["access_key"])
 		
         sent_data = {}
@@ -266,7 +266,7 @@ class Server(BaseHTTPRequestHandler):
             sent_data = MyExchange.GetDepth(symbol, access_key, secret_key)
         elif data['method'] == "records":
             symbol = data['params']['symbol'].upper()
-            symbol.replace('_','/')
+            
             period = data['params']['period']
             ret_data = ccfox.get_queryCandlestick(symbol, int(period)*60*1000)
             
@@ -313,6 +313,18 @@ class Server(BaseHTTPRequestHandler):
             ret_data = []
             if path == "/api/v1/future/queryContract":
                 ret_data = ccfox.list_futureQueryContract()
+            elif path == "/api/v1/common/queryCurrency":
+                ret_data = ccfox.list_commonQueryCurrency()
+            elif path == "/api/v1/common/exchange/list":
+                ret_data = ccfox.list_exchange()
+            elif path == "/api/v1/future/margin":
+                ret_data = ccfox.get_usermargin()
+            elif path == "/api/v1/future/position":
+                ret_data = ccfox.get_position()
+            elif path == "/api/v1/future/order":
+                ret_data = ccfox.future_order(contractId=params['contractId'],side=params['side'],price=params['price'],quantity=params['quantity'],orderType=params['orderType'],positionEffect=params['positionEffect'],marginType=params['marginType'],marginRate=params['marginRate'])
+            elif path == "//api/v1/future/order/DELETE":
+                ret_data = ccfox.delete_order(f'{params}')
             
             sent_data['data'] = ret_data
 
