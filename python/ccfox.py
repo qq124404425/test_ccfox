@@ -1,37 +1,38 @@
-# -*- coding: utf-8 -*-
 import time
-from requests import Request, Session
+from typing import Optional, Dict, Any, List
+#from pprint import pprint
+from requests import Request, Session, Response
 import hmac
 
 
 class ccfoxClient:
     _ENDPOINT = 'https://api.ccfox.com/api/v1/'
 
-    def __init__(self,key, secret):
+    def __init__(self,key, secret) -> None:
         self._session = Session()
         self._api_key = key # TODO: Place your API key here
         self._api_secret = secret # TODO: Place your API secret here
 
-    def _get(self, path, params = None):
+    def _get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
         return self._request('GET', path, params=params)
 
-    def _post(self, path, params = None):
+    def _post(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
         return self._request('POST', path, json=params)
 
-    def _delete(self, path, params = None):
+    def _delete(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
         return self._request('DELETE', path, params=params)
 
-    def _request(self, method, path, **kwargs):
+    def _request(self, method: str, path: str, **kwargs) -> Any:
         request = Request(method, self._ENDPOINT + path, **kwargs)
         self._sign_request(request)
         response = self._session.send(request.prepare())
         return self._process_response(response)
 
-    def _sign_request(self, request):
+    def _sign_request(self, request: Request) -> None:
         ts = int(time.time() * 1000)
         prepared = request.prepare()
+        print(f'{prepared.method}{prepared.path_url}{ts}')
         signature_payload = f'{prepared.method}{prepared.path_url}{ts}'.encode()
-        #signature_payload = "{}{}{}".format(prepared.method, prepared.path_url,str(ts))
         if prepared.body:
             signature_payload += prepared.body
         signature = hmac.new(self._api_secret.encode(), signature_payload, 'sha256').hexdigest()
@@ -40,7 +41,7 @@ class ccfoxClient:
         request.headers['apiExpires'] = str(ts)
         request.headers['Content-Type'] = 'application/json'
 
-    def _process_response(self, response):
+    def _process_response(self, response: Response) -> Any:
         try:
             data = response.json()
             #pprint(data)
@@ -68,7 +69,7 @@ class ccfoxClient:
         return self._get('common/exchange/coins')['result']
 
     #获取期货交割历史
-    def get_queryContractDeliveryList(self,type1='2',pageNum='1',pageSize='1',contractId=None,sort=None):#获取计价货币的价格
+    def get_queryContractDeliveryList(self,type1:str='2',pageNum:str='1',pageSize:str='1',contractId:str=None,sort:str=None):#获取计价货币的价格
         RAW = self._get('future/queryContractDeliveryList',{'type': type1,
                                      'pageNum': pageNum,
                                      'pageSize': pageSize,
@@ -79,7 +80,7 @@ class ccfoxClient:
 
 
     '''2.行情类'''
-    def get_queryMarketStat(self,currencyId='2'):#获取24小时统计
+    def get_queryMarketStat(self,currencyId:str='2'):#获取24小时统计
         RAW = self._get('/futureQuot/queryMarketStat',{'currencyId': currencyId})
         if RAW['msg']=='success': return RAW['data']
 
@@ -87,10 +88,10 @@ class ccfoxClient:
         RAW = self._get('/futureQuot/queryCandlestick',{'symbol': symbol,'range':ranges})
         if RAW['success']==1: return RAW['data']['lines']
     
-    def list_querySnapshot(self,contractId):#获取单个合约行情快照
+    def list_querySnapshot(self,contractId:str):#获取单个合约行情快照
         return self._get('futureQuot/querySnapshot',{'contractId': contractId})['result']
 
-    def list_queryTickTrade(self,contractId):#获取逐笔成交
+    def list_queryTickTrade(self,contractId:str):#获取逐笔成交
         return self._get('futureQuot/queryTickTrade',{'contractId': contractId})['data']
 
     def list_queryIndicatorList(self):#获取所有行情快照
@@ -111,7 +112,7 @@ class ccfoxClient:
         RAW = self._get('future/position')
         if RAW['msg']=='success': return RAW['data']
 
-    def get_queryVarietyMargin(self,varietyId,contractId): #获取用户合约保证金梯度
+    def get_queryVarietyMargin(self,varietyId:str,contractId:set): #获取用户合约保证金梯度
         RAW = self._get('future/queryVarietyMargin',{'varietyId': varietyId,'contractId': contractId})
         if RAW['msg']=='success': return RAW['data']
 
@@ -119,8 +120,8 @@ class ccfoxClient:
 
 
     # 合约下单
-    def future_order(self,contractId,side,price, quantity,orderType,
-                    positionEffect, marginType,marginRate):
+    def future_order(self,contractId: str,side: str,price: float, quantity: float,orderType: str,
+                    positionEffect: bool, marginType: str,marginRate:str) -> dict:
         return self._post('future/order',{'contractId':contractId ,#	交易对ID
                                      'side': side,#合约委托方向（买1，卖-1）
                                      'price': price,#合约委托价格（order_type等于3（市价）时非必填 ）
@@ -132,8 +133,8 @@ class ccfoxClient:
 
 
     # 合约批量下单
-    def future_orders(self,contractId,side,price, quantity,orderType,
-                    positionEffect, marginType,marginRate):
+    def future_orders(self,contractId: str,side: str,price: float, quantity: float,orderType: str,
+                    positionEffect: bool, marginType: str,marginRate:str) -> dict:
         '''return self._post('future/orders',{'contractId':contractId ,#交易对ID
                                      'side': side,#合约委托方向（买1，卖-1）
                                      'price': price,#合约委托价格（order_type等于3（市价）时非必填 ）
@@ -156,7 +157,7 @@ class ccfoxClient:
         RAW = self._delete('future/order/all')
         if RAW['msg']=='success': return RAW['data']
 
-    def get_order(self,orderId): #获取订单信息
+    def get_order(self,orderId:str): #获取订单信息
         RAW = self._get('future/order',{'filter': orderId})
         if RAW['msg']=='success': return RAW['data']
 
@@ -169,12 +170,12 @@ class ccfoxClient:
         if RAW['msg']=='success': return RAW['data']
         
 
-    def post_positionisolate(self,contractId,marginType,initMarginRate='1'): #获取强减队列
+    def post_positionisolate(self,contractId:str,marginType:str,initMarginRate:str='1'): #获取强减队列
         RAW = self._post('future/position/isolate',{'contractId': contractId,'initMarginRate': initMarginRate,'marginType': marginType})
         if RAW['msg']=='success': return RAW['data']
         
 
-    def post_transferMargin(self,contractId,margin): #调整保证金率
+    def post_transferMargin(self,contractId:str,margin:str): #调整保证金率
         RAW = self._post('future/position/transferMargin',{'contractId': contractId,'margin': margin})
         if RAW['msg']=='success': return RAW['data']
 
