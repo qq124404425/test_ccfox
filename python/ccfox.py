@@ -30,15 +30,11 @@ class ccfoxClient:
     def _sign_request(self, request):
         ts = int(time.time() * 1000)
         prepared = request.prepare()
-        #signature_payload = prepared.method + prepared.path_url + str(ts)
-        #signature_payload = f'{prepared.method}{prepared.path_url}{ts}'
-        signature_payload = "{}{}{}".format(prepared.method, prepared.path_url,str(ts))
-        print(signature_payload)
+        signature_payload = f'{prepared.method}{prepared.path_url}{ts}'.encode()
+        #signature_payload = "{}{}{}".format(prepared.method, prepared.path_url,str(ts))
         if prepared.body:
             signature_payload += prepared.body
-        #signature = hmac.new(bytes(self._api_secret, 'utf8'), bytes(signature_payload, 'utf8'), digestmod=hashlib.sha256).hexdigest()
-        #signature = hmac.new(self._api_secret.encode(), signature_payload.encode(), 'sha256').hexdigest()
-        signature = "2222"       
+        signature = hmac.new(self._api_secret.encode(), signature_payload, 'sha256').hexdigest()
         request.headers['apiKey'] = self._api_key
         request.headers['signature'] = signature
         request.headers['apiExpires'] = str(ts)
