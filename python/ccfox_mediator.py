@@ -250,7 +250,7 @@ class Server(BaseHTTPRequestHandler):
         self.data_string = self.rfile.read(int(self.headers['Content-Length'])).decode()
         data =json.loads(self.data_string.replace("'", '"'))
         print(data)
-        ccfox = ccfoxClient(data["access_key"],data["access_key"])
+        ccfox = ccfoxClient(data["access_key"],data["secret_key"])
 		
         sent_data = {}
         if data['method'] == "ticker":
