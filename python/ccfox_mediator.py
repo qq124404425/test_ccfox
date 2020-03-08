@@ -308,7 +308,7 @@ class Server(BaseHTTPRequestHandler):
         elif data['method'][:2] == "__":
             path = data["method"].split('_')[-1]
             params = data["params"]
-            
+            print(params)
             sent_data = {"data":[]}
             ret_data = []
             if path == "/api/v1/future/queryContract":
@@ -328,9 +328,13 @@ class Server(BaseHTTPRequestHandler):
                 ret_data = ccfox.get_position()
             elif path == "/api/v1/future/order":
                 ret_data = ccfox.future_order(contractId=params['contractId'],side=params['side'],price=params['price'],quantity=params['quantity'],orderType=params['orderType'],positionEffect=params['positionEffect'],marginType=params['marginType'],marginRate=params['marginRate'])
-            elif path == "//api/v1/future/order/DELETE":
+            elif path == "/api/v1/future/order/DELETE":
                 ret_data = ccfox.delete_order(f'{params}')
-            
+            elif path == "/api/v1/future/order/GET":
+                ret_data = ccfox.get_order(f'{params}')
+            elif path == "/api/v1/future/queryActiveOrder":
+                ret_data = ccfox.get_queryActiveOrder()
+                
             sent_data['data'] = ret_data
 
         self.do_HEAD()
