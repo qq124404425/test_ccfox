@@ -317,6 +317,8 @@ class Server(BaseHTTPRequestHandler):
                 ret_data = ccfox.list_commonQueryCurrency()
             elif path == "/api/v1/common/exchange/list":
                 ret_data = ccfox.list_exchange()
+            elif path == "/api/v1/common/exchange/coins":
+                ret_data = ccfox.list_exchangecoins()
             elif path == "/api/v1/future/margin":
                 ret_data = ccfox.get_usermargin()
             elif path == "/api/v1/future/position":
