@@ -319,6 +319,9 @@ class Server(BaseHTTPRequestHandler):
                 ret_data = ccfox.list_exchange()
             elif path == "/api/v1/common/exchange/coins":
                 ret_data = ccfox.list_exchangecoins()
+            elif path == "/api/v1/futureQuot/querySnapshot":
+                symbol = params['symbol'].upper()
+                ret_data = ccfox.list_querySnapshot(symbol)
             elif path == "/api/v1/future/margin":
                 ret_data = ccfox.get_usermargin()
             elif path == "/api/v1/future/position":
