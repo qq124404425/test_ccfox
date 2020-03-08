@@ -309,6 +309,8 @@ class Server(BaseHTTPRequestHandler):
             path = data["method"].split('_')[-1]
             params = data["params"]
             print(params)
+            params.replace("'", '"')
+            print(params)
             sent_data = {"data":[]}
             ret_data = []
             if path == "/api/v1/future/queryContract":
