@@ -333,7 +333,8 @@ class Server(BaseHTTPRequestHandler):
             elif path == "/api/v1/future/order/DELETE":
                 ret_data = ccfox.delete_order(f'{params}')
             elif path == "/api/v1/future/order/GET":
-                ret_data = ccfox.get_order(f'{params}')
+                orderId = params['orderId']
+                ret_data = ccfox.get_order(f'{"orderId":"{orderId}"}')
             elif path == "/api/v1/future/queryActiveOrder":
                 ret_data = ccfox.get_queryActiveOrder()
                 
